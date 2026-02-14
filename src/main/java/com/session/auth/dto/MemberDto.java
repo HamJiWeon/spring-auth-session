@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Builder
 public class MemberDto {
     private String userEmail;
+    private String userPassword;
     private String userPhone;
     private LocalDate userBirthDate;
     private String role;
