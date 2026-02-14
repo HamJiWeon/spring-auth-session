@@ -4,7 +4,6 @@ import com.session.auth.dto.MemberDto;
 import com.session.auth.entity.Member;
 import com.session.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,5 +39,17 @@ public class MemberService {
                 .ifPresent(m -> {
                     throw new IllegalStateException("이미 가입된 이메일입니다.");
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public Long login(String email, String password) {
+        Member member = memberRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+
+        if (!passwordEncoder.matches(password, member.getUserPassword())) {
+            throw new IllegalStateException("일치하지 않는 비밀번호입니다.");
+        }
+
+        return member.getUserId();
     }
 }
