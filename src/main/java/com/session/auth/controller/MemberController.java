@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -52,12 +54,40 @@ public class MemberController {
     // Test
     @GetMapping("/me")
     public ResponseEntity<String> getMyInfo(
-            @SessionAttribute(name = "loginMember", required = false) Long userId
-    ) {
+            @SessionAttribute(name = "loginMember", required = false) Long userId) {
         if (userId == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
 
         return ResponseEntity.ok("현재 로그인 된 회원 ID: " + userId);
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<String> updatePassword(
+            @SessionAttribute(name = "loginMember", required = false) Long userId,
+            @RequestBody Map<String, String> passwords) {
+        if (userId == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
+
+        try {
+            memberService.updatePassword(userId, passwords.get("oldPassword"), passwords.get("newPassword"));
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<String> withdraw(
+            @SessionAttribute(name = "loginMember", required = false) Long userId,
+            HttpServletRequest request) {
+
+        if (userId == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
+
+        memberService.deleteMember(userId);
+
+        HttpSession session = request.getSession(false);
+        if (session != null) session.invalidate();
+
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 }

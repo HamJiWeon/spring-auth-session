@@ -42,4 +42,8 @@ public class Member {
         this.userBirthDate = userBirthDate;
         this.role = role;
     }
+
+    public void updatePassword(String encodedPassword) {
+        this.userPassword = encodedPassword;
+    }
 }

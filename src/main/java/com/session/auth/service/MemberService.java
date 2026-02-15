@@ -52,4 +52,23 @@ public class MemberService {
 
         return member.getUserId();
     }
+
+    @Transactional
+    public void updatePassword(Long userId, String oldPassword, String newPassword) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+
+        if (!passwordEncoder.matches(oldPassword, member.getUserPassword())) {
+            throw new IllegalStateException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+
+        member.updatePassword(encodedNewPassword);
+    }
+
+    @Transactional
+    public void deleteMember(Long userId) {
+        memberRepository.deleteById(userId);
+    }
 }
